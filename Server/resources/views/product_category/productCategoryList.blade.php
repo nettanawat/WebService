@@ -24,12 +24,12 @@
             @foreach($productCategories as $productCategory)
 
             <tr>
-                <th>{{$productCategory->id}}</th>
-                <th>{{$productCategory->name}}</th>
-                <th>{{$productCategory->slug}}</th>
-                <th>{{$productCategory->created_at}}</th>
-                <th>{{$productCategory->updated_at}}</th>
-                <th>-</th>
+                <td>{{$productCategory->id}}</td>
+                <td>{{$productCategory->name}}</td>
+                <td>{{$productCategory->slug}}</td>
+                <td>{{$productCategory->created_at}}</td>
+                <td>{{$productCategory->updated_at}}</td>
+                <td>-</td>
             </tr>
             @endforeach
         </table>

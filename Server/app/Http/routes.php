@@ -34,8 +34,10 @@ Route::get('/productsubcategory/add', 'ProductSubCategoryController@create');
 
 
 Route::get('/product', 'ProductController@index');
+Route::get('/product/overview', 'ProductController@overview');
 Route::post('/product', 'ProductController@store');
 Route::get('/product/add', 'ProductController@create');
 Route::get('/product/{slug}', 'ProductController@show');
 
 Route::get('/order', 'OrderController@index');
+Route::get('/order/instruction', 'OrderController@instruction');

@@ -17,7 +17,7 @@
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Product Management<span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a href="/product">Overview</a></li>
+                        <li><a href="/product/overview">Overview</a></li>
                         <li class="dropdown-header">Product</li>
                         <li><a href="/product">Product list</a></li>
                         <li><a href="/product/add">Add product</a></li>

@@ -113,12 +113,24 @@ class ProductController extends Controller
 
     public function allProductsApi(){
         $productList = Product::all();
-        return response()->json(['productList' => $productList]);
+        $categories = ProductSubCategory::all();
+        foreach($categories as $category){
+
+        }
+        return response()->json([
+            'response_message' => 'success',
+            'response_rows' => sizeof($productList),
+            'response_data' => $productList
+        ]);
     }
 
     public function productApi($slug)
     {
         $product = Product::whereSlug($slug)->first();
         return response()->json(['product' => $product]);
+    }
+
+    public function overview(){
+        return view('product.overview');
     }
 }

@@ -7,6 +7,7 @@
     <!--    <link href="{!! asset('css/app.css') !!}" rel="stylesheet" type="text/css">-->
     <script type="text/javascript" src="{!! asset('js/jquery.js') !!}"></script>
     <script type="text/javascript" src="{!! asset('css/bootstrap-3.3.5-dist/js/bootstrap.min.js') !!}"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 </head>
 <body>
 @include('menu')

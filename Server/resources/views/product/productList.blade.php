@@ -21,7 +21,7 @@
     <h2 class="col-md-12">Product</h2>
 
     <div class="row">
-        <table class="table table-striped text-center">
+        <table class="table table-hover text-center">
             <tr>
                 <th class="text-center">product_id</th>
                 <th class="text-center">product_name</th>
@@ -40,7 +40,7 @@
                 <td>{{$product->name}}</td>
                 <td>{{$product->amount}}</td>
                 <td>{{$product->cost}}</td>
-                <td>{{$product->price}}</td>
+                <td>${{$product->price}}</td>
                 <td>{{$product->productSubcategory->name}}</td>
                 <td>{{$product->productSubcategory->productCategory->name}}</td>
                 <td>{{$product->created_at}}</td>

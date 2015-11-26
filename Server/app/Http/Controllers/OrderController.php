@@ -116,4 +116,16 @@ class OrderController extends Controller
         return response()->json(['order' => $order]);
     }
 
+    public function instruction(){
+        $instruction = [
+            'productId' => 'id',
+            'productName' => 'name',
+            'productAmount' => 'amount',
+            'productPrice' => 'price',
+        ];
+        return response()->json([
+            'response_message' => 'success',
+            'response_date' => $instruction
+        ]);
+    }
 }
