@@ -6,6 +6,7 @@ use App\Model\Customer;
 use App\Model\CustomerAddress;
 use App\Model\Order;
 use App\Model\OrderDetail;
+use App\Model\Product;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -20,8 +21,15 @@ class OrderController extends Controller
      */
     public function index()
     {
-        $order = Order::all();
-        return view('order.orderList', ['orders' => $order]);
+        $orders = Order::all();
+        foreach($orders as $order){
+            if($order->orderDetail->amount > $order->orderDetail->product->amount){
+                $order->stock_status = false;
+            } else {
+                $order->stock_status = true;
+            }
+        }
+        return view('order.orderList', ['orders' => $orders]);
     }
 
     /**
@@ -43,9 +51,9 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         if($request->get('customer_name') == null) {
-            return response()->json([
-                'response_message' => 'fail',
-                'response_data' => 'Customer name is required',
+            return back()->with([
+            'response_order_message' => 'fail',
+            'response_order_message_detail' => 'Customer name is required'
             ]);
         }
 
@@ -68,17 +76,26 @@ class OrderController extends Controller
             $customerAddress->save();
         }
 
-//        $order = new Order();
-//        $order->customer_id = $customer->id;
-//        $order->status = 0;
-//        $order->save();
-//        $orderDetailController = new OrderDetailController();
-//        $orderDetailController->store($request, $order->id);
+        $order = new Order();
+        $order->customer_id = $customer->id;
+        $order->status = 0;
+        $order->save();
 
-        return  response()->json([
-            'response_message' => 'success',
-            'response_data' => 'OK'
+        $orderDetail = new OrderDetail();
+        $orderDetail->order_id = $order->id;
+        $orderDetail->product_id = $request->get('product_id');
+        $orderDetail->amount = $request->get('amount');
+        $orderDetail->total_price = Product::findOrNew($orderDetail->product_id)->price * $orderDetail->amount;
+        $orderDetail->save();
+
+        return back()->with([
+            'response_order_message' => 'success',
+            'response_order_message_detail' => 'Thank you'
         ]);
+//        return  response()->json([
+//            'response_message' => 'success',
+//            'response_data' => 'OK'
+//        ]);
     }
 
     /**
@@ -126,10 +143,11 @@ class OrderController extends Controller
 
     }
 
-    public function cancelOrder($id) {
-        $order = Order::findOrNew($id);
+    public function cancelOrder(Request $request) {
+        $order = Order::findOrNew($request->get('id'));
         $order->status = 2;//canceled
         $order->save();
+        return redirect()->back();
     }
 
     public function getOrderByCustomerId($customerId){
@@ -140,30 +158,31 @@ class OrderController extends Controller
     public function instruction(){
 
         $customer = [
-            'customerName' => 'customer_name',
-            'customerPhoneNumber' => 'customer_phone_number',
-            'customerEmail' => 'customer_email',
+            'customer_name' => 'customer_name',
+            'customer_phone_number' => 'customer_phone_number',
+            'customer_email' => 'customer_email',
         ];
 
         $customerAddress = [
-            'addressLine1' => 'line1',
-            'addressLine2' => 'line2',
-            'addressDistrict' => 'district',
-            'addressProvince' => 'province',
-            'addressPostCode' => 'post_code',
+            'line1' => 'line1',
+            'line2' => 'line2',
+            'district' => 'district',
+            'province' => 'province',
+            'post_code' => 'post_code',
         ];
 
         $product = [
-            'productId' => 'id',
-            'productName' => 'name',
-            'productAmount' => 'amount',
-            'productPrice' => 'price',
+            'id' => 'id',
+            'name' => 'name',
+            'amount' => 'amount',
+            'price' => 'price',
         ];
 
         $requireInformation = [
             'product_information' => $product,
             'customer_information' => $customer,
-            'address_information' => $customerAddress
+            'address_information' => $customerAddress,
+            'url' => '/api/order/placeorder'
         ];
 //        $instruction->customer = $customer;
 //        $instruction->customer->address = $customerAddress;
@@ -173,12 +192,16 @@ class OrderController extends Controller
         ]);
     }
 
-    public function acceptOrder($id){
-        $order = Order::findOrNew($id);
+    public function acceptOrder(Request $request){
+        $order = Order::findOrNew($request->get('id'));
         $order->status = 1; //accepted
         $order->save();
 
+        $product = Product::findOrNew($request->get('productId'));
+        $product->amount = $product->amount - $request->get('productAmount');
+        $product->save();
+
         //return invoice to customer
-        return null;
+        return redirect()->back();
     }
 }

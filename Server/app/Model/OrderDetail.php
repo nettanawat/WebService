@@ -13,7 +13,7 @@ class OrderDetail extends Model
     }
 
     public function product(){
-        return $this->belongsToMany('App\Model\Product', 'product_id');
+        return $this->belongsTo('App\Model\Product', 'product_id');
     }
 
 }

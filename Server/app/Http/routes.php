@@ -18,7 +18,8 @@ Route::get('/', function () {
 //API
 Route::get('/api/product', 'ProductController@allProductsApi');
 Route::get('/api/product/{slug}', 'ProductController@productApi');
-Route::get('/api/order', 'OrderController@store');
+Route::get('/api/order', 'OrderController@instruction');
+Route::post('/api/order/placeorder', 'OrderController@store');
 Route::get('/api/order/{id}', 'OrderController@show');
 
 
@@ -40,4 +41,5 @@ Route::get('/product/add', 'ProductController@create');
 Route::get('/product/{slug}', 'ProductController@show');
 
 Route::get('/order', 'OrderController@index');
-Route::get('/order/instruction', 'OrderController@instruction');
+Route::post('/order/cancel', 'OrderController@cancelOrder');
+Route::post('/order/accept', 'OrderController@acceptOrder');

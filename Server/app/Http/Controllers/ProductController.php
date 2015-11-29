@@ -74,7 +74,7 @@ class ProductController extends Controller
     public function show($slug)
     {
         $product = Product::whereSlug($slug)->first();
-        return response()->json(['product' => $product]);
+        return view('product.productInformation', ['product' => $product]);
     }
 
     /**
