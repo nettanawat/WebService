@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Model\Bill;
 use App\Model\Customer;
 use App\Model\CustomerAddress;
 use App\Model\Order;
@@ -11,6 +12,8 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -51,14 +54,14 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         if($request->get('customer_name') == null) {
-            return back()->with([
+            return response()->json([
             'response_order_message' => 'fail',
             'response_order_message_detail' => 'Customer name is required'
             ]);
         }
 
-        $customer = Customer::findOrNew($request->get('customer_name'));
-        if($customer->id == null){
+        $customer = Customer::where('name', '=', $request->get('customer_name'))->first();
+        if($customer == null) {
             $customer = new Customer();
             $customer->name = $request->get('customer_name');
             $customer->slug = str_slug($customer->name);
@@ -88,14 +91,7 @@ class OrderController extends Controller
         $orderDetail->total_price = Product::findOrNew($orderDetail->product_id)->price * $orderDetail->amount;
         $orderDetail->save();
 
-        return back()->with([
-            'response_order_message' => 'success',
-            'response_order_message_detail' => 'Thank you'
-        ]);
-//        return  response()->json([
-//            'response_message' => 'success',
-//            'response_data' => 'OK'
-//        ]);
+        return $order->id;
     }
 
     /**
@@ -143,13 +139,6 @@ class OrderController extends Controller
 
     }
 
-    public function cancelOrder(Request $request) {
-        $order = Order::findOrNew($request->get('id'));
-        $order->status = 2;//canceled
-        $order->save();
-        return redirect()->back();
-    }
-
     public function getOrderByCustomerId($customerId){
         $order = Order::where('customer_id', '=', $customerId);
         return response()->json(['order' => $order]);
@@ -193,15 +182,130 @@ class OrderController extends Controller
     }
 
     public function acceptOrder(Request $request){
-        $order = Order::findOrNew($request->get('id'));
+
+        $order = Order::findOrNew($request->get('order_id'));
         $order->status = 1; //accepted
         $order->save();
 
-        $product = Product::findOrNew($request->get('productId'));
-        $product->amount = $product->amount - $request->get('productAmount');
+        $product = Product::findOrNew($request->get('product_id'));
+        $product->amount = $product->amount - $request->get('product_amount');
         $product->save();
 
-        //return invoice to customer
+
+        $bill = new Bill();
+        $bill->status = 0;
+        $bill->customer_id = 1;
+        $bill->order_id = $order->id;
+        $bill->save();
+
+        $passingData = array(
+            'order_id' => $order->id,
+            'message_title' => 'Confirmed order',
+            'message_detail' => 'You order id '.$request->get('order_id').' has been confirm (product_name : '
+                .$request->get('product_name'). ', order_date : '.$request->get('order_date').')'
+        );
+        $data_string = json_encode($passingData);
+
+        $url = curl_init('http://localhost:8080/api/order/confirm');
+        curl_setopt($url, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($url, CURLOPT_POSTFIELDS, $data_string);
+        curl_setopt($url, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($url, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($data_string))
+        );
+
+//        response back
+        $result = curl_exec($url);
+
+        $data = array(
+            'name' => $order->customer->name,
+            'phone_number' => $order->customer->phone_number,
+            'email' => $order->customer->email,
+            'line1' => $order->customer->customerAddress->line1,
+            'district' => $order->customer->customerAddress->district,
+            'province' => $order->customer->customerAddress->province,
+            'post_code' => $order->customer->customerAddress->post_code,
+            'product_name' => $order->orderDetail->product->name,
+            'product_amount' => $order->orderDetail->amount,
+            'total_price' => $order->orderDetail->total_price,
+            'is_paid' => 0,
+            'order_id' => $order->id
+        );
+        $data_string = json_encode($data);
+
+        $url2 = curl_init('http://localhost:8080/api/bill/create');
+        curl_setopt($url2, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($url2, CURLOPT_POSTFIELDS, $data_string);
+        curl_setopt($url2, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($url2, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($data_string))
+        );
+
+        $result2 = curl_exec($url2);
+
+
+        $notificationData = array(
+            'message_title' => 'Notify Payment',
+            'message_detail' => 'Your bill which has order id '.$request->get('order_id'). 'is waiting for payment.'
+        );
+        $data_string = json_encode($notificationData);
+
+        $notificationUrl = curl_init('http://localhost:8080/api/notification/add');
+        curl_setopt($notificationUrl, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($notificationUrl, CURLOPT_POSTFIELDS, $data_string);
+        curl_setopt($notificationUrl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($notificationUrl, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($data_string))
+        );
+
+//        response back
+        $result3 = curl_exec($notificationUrl);
+
         return redirect()->back();
+    }
+
+    public function cancelOrder(Request $request) {
+
+        $order = Order::findOrNew($request->get('order_id'));
+        $order->status = 2;//canceled
+        $order->save();
+
+        $passingDate = array(
+            'order_id' => $order->id,
+            'message_title' => 'Canceled order',
+            'message_detail' => 'You order id '.$request->get('order_id').' has been canceled (product_name : '
+                .$request->get('product_name'). ', order_date : '.$request->get('order_date').')'
+        );
+        $data_string = json_encode($passingDate);
+
+        $url = curl_init('http://localhost:8080/api/order/cancel');
+        curl_setopt($url, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($url, CURLOPT_POSTFIELDS, $data_string);
+        curl_setopt($url, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($url, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($data_string))
+        );
+
+//        response back
+        $result = curl_exec($url);
+        return redirect()->back();
+    }
+
+    public function cancelOrderAPI(Request $request){
+        $order = Order::findOrNew($request->get('server_order_id'));
+        $order->status = 2;//canceled
+        $order->save();
+        return $order->id;
+    }
+
+    public function updatepaid(Request $request){
+        $order = Order::findOrNew($request->get('order_id'));
+        $order->is_paid = 1;//canceled
+        $order->save();
+        return $order->id;
     }
 }

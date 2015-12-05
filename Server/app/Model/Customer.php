@@ -14,4 +14,8 @@ class Customer extends Model
     public function orderDetail(){
         return $this->hasMany('App\Model\OrderDetail');
     }
+
+    public function bill(){
+        return $this->hasMany('App\Model\Bill');
+    }
 }

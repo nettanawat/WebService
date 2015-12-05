@@ -2,16 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Model\Customer;
-use App\Model\ProductCategory;
-use App\Model\ProductSubCategory;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Validator;
 
-class ProductSubCategoryController extends Controller
+class BillController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -20,8 +16,7 @@ class ProductSubCategoryController extends Controller
      */
     public function index()
     {
-        $productSubCategoryList = ProductSubCategory::all();
-        return view('product_sub_category.productSubCategoryList', ['productSubCategories' => $productSubCategoryList]);
+        //
     }
 
     /**
@@ -31,8 +26,7 @@ class ProductSubCategoryController extends Controller
      */
     public function create()
     {
-        $productCategory = ProductCategory::all();
-        return view('product_sub_category.addProductSubCategory', ['productCategories' => $productCategory]);
+        //
     }
 
     /**
@@ -43,20 +37,7 @@ class ProductSubCategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|unique:product_sub_categories',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-
-        $productSubCategory = new ProductSubCategory();
-        $productSubCategory->name = $request->get('name');
-        $productSubCategory->slug = str_slug($productSubCategory->name);
-        $productSubCategory->product_category_id = $request->get('product_category_id');
-        $productSubCategory->save();
-        return redirect('/productsubcategory');
+        //
     }
 
     /**
@@ -65,10 +46,9 @@ class ProductSubCategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($slug)
+    public function show($id)
     {
-        $productSubCategory = ProductSubCategory::whereSlug($slug)->first();
-        return response()->json(['productSubCategory' => $productSubCategory]);
+        //
     }
 
     /**

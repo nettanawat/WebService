@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Model\Customer;
-use App\Model\ProductCategory;
-use App\Model\ProductSubCategory;
+use App\Model\Notification;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Validator;
+use PhpSpec\Exception\Exception;
 
-class ProductSubCategoryController extends Controller
+class NotificationController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -20,8 +18,8 @@ class ProductSubCategoryController extends Controller
      */
     public function index()
     {
-        $productSubCategoryList = ProductSubCategory::all();
-        return view('product_sub_category.productSubCategoryList', ['productSubCategories' => $productSubCategoryList]);
+        $notification = Notification::all();
+        return view('notification.notificationList', ['notifications' => $notification]);
     }
 
     /**
@@ -31,8 +29,7 @@ class ProductSubCategoryController extends Controller
      */
     public function create()
     {
-        $productCategory = ProductCategory::all();
-        return view('product_sub_category.addProductSubCategory', ['productCategories' => $productCategory]);
+        //
     }
 
     /**
@@ -43,20 +40,16 @@ class ProductSubCategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|unique:product_sub_categories',
-        ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
+        $notification = new Notification();
+        try {
+            $notification->title = $request->get('message_title');
+            $notification->detail = $request->get('message_detail');
+            $notification->is_read = 0;
+            $notification->save();
+        } catch (Exception $ex) {
+            return $ex;
         }
-
-        $productSubCategory = new ProductSubCategory();
-        $productSubCategory->name = $request->get('name');
-        $productSubCategory->slug = str_slug($productSubCategory->name);
-        $productSubCategory->product_category_id = $request->get('product_category_id');
-        $productSubCategory->save();
-        return redirect('/productsubcategory');
+//        return redirect()->back();
     }
 
     /**
@@ -65,10 +58,9 @@ class ProductSubCategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($slug)
+    public function show($id)
     {
-        $productSubCategory = ProductSubCategory::whereSlug($slug)->first();
-        return response()->json(['productSubCategory' => $productSubCategory]);
+        //
     }
 
     /**
@@ -91,7 +83,10 @@ class ProductSubCategoryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $notification = Notification::findOrNew($id);
+        $notification->is_read = 1;
+        $notification->save();
+        return redirect()->back();
     }
 
     /**
@@ -104,4 +99,5 @@ class ProductSubCategoryController extends Controller
     {
         //
     }
+
 }

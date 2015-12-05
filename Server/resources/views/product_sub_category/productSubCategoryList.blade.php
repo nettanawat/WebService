@@ -22,14 +22,13 @@
                 <th>actions</th>
             </tr>
             @foreach($productSubCategories as $productSubCategory)
-
             <tr>
-                <th>{{$productSubCategory->id}}</th>
-                <th>{{$productSubCategory->name}}</th>
-                <th>{{$productSubCategory->slug}}</th>
-                <th>{{$productSubCategory->created_at}}</th>
-                <th>{{$productSubCategory->updated_at}}</th>
-                <th>-</th>
+                <td>{{$productSubCategory->id}}</td>
+                <td>{{$productSubCategory->name}}</td>
+                <td>{{$productSubCategory->slug}}</td>
+                <td>{{$productSubCategory->created_at}}</td>
+                <td>{{$productSubCategory->updated_at}}</td>
+                <td>-</td>
             </tr>
             @endforeach
         </table>

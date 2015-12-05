@@ -20,7 +20,11 @@ Route::get('/api/product', 'ProductController@allProductsApi');
 Route::get('/api/product/{slug}', 'ProductController@productApi');
 Route::get('/api/order', 'OrderController@instruction');
 Route::post('/api/order/placeorder', 'OrderController@store');
+Route::post('/api/order/cancel', 'OrderController@cancelOrderAPI');
 Route::get('/api/order/{id}', 'OrderController@show');
+Route::post('/api/order/updatepaid', 'OrderController@updatepaid');
+
+
 
 
 //NORMAL
@@ -42,4 +46,4 @@ Route::get('/product/{slug}', 'ProductController@show');
 
 Route::get('/order', 'OrderController@index');
 Route::post('/order/cancel', 'OrderController@cancelOrder');
-Route::post('/order/accept', 'OrderController@acceptOrder');
+Route::post('/order/confirm', 'OrderController@acceptOrder');

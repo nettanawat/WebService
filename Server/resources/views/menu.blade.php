@@ -31,13 +31,11 @@
                         <li><a href="/productcategory/add">Add category</a></li>
                     </ul>
                 </li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Order Management <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="/order">Order list</a></li>
-                        <li><a href="/order/place">Place order</a></li>
-                    </ul>
-                </li>
+                <ul class="nav navbar-nav">
+                        <li>
+                            <a href="/order">Order Management</a>
+                        </li>
+                </ul>
                 <li class="dropdown">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Invoice <span class="caret"></span></a>
                     <ul class="dropdown-menu">
